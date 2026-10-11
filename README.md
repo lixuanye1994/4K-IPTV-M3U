@@ -9,7 +9,9 @@
 - Windows 直播播放器: [lemonIPTV-windows](https://github.com/jia070310/lemonIPTV-windows)
 - 影视客户端:[MacCMS影视服务前端播放器](https://github.com/jia070310/lemonTV-Film)
 
-![预览图](https://github.com/jia070310/4K-IPTV-M3U/blob/main/tv.png)
+![预览图](https://github.com/lixuanye1994/4K-IPTV-M3U/blob/main/tv.png)
+
+> 本仓库 fork 自 [jia070310/4K-IPTV-M3U](https://github.com/jia070310/4K-IPTV-M3U)，脚本与播放器项目均属原作者。
 
 ### 仓库内容
 
@@ -56,7 +58,13 @@ GitHub README 不支持可执行脚本，`onclick` 复制按钮会失效，因�
 </tr>
 </thead>
 <tbody>
-<tr><td colspan="4">暂无文件</td></tr>
+<tr><td style="white-space:nowrap;">上海电信.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A1.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A1.m3u</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信1.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A11.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A11.m3u</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信2.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A12.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A12.m3u</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信3.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A13.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A13.m3u</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信4.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A14.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A14.m3u</code></td></tr>
+<tr><td style="white-space:nowrap;">上海联通.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A.m3u</code></td></tr>
+<tr><td style="white-space:nowrap;">上海联通1.m3u</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A1.m3u">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/m3u/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A1.m3u</code></td></tr>
 </tbody>
 </table>
 ## TXT 文件列表
@@ -77,7 +85,13 @@ GitHub README 不支持可执行脚本，`onclick` 复制按钮会失效，因�
 </tr>
 </thead>
 <tbody>
-<tr><td colspan="4">暂无文件</td></tr>
+<tr><td style="white-space:nowrap;">上海电信.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A1.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A1.txt</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信1.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A11.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A11.txt</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信2.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A12.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A12.txt</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信3.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A13.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A13.txt</code></td></tr>
+<tr><td style="white-space:nowrap;">上海电信4.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A14.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E7%94%B5%E4%BF%A14.txt</code></td></tr>
+<tr><td style="white-space:nowrap;">上海联通.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A.txt</code></td></tr>
+<tr><td style="white-space:nowrap;">上海联通1.txt</td><td style="white-space:nowrap;"><a href="https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A1.txt">下载链接</a></td><td style="white-space:nowrap;">2026-10-11 19:53:15</td><td><code>https://gh-proxy.org/https://raw.githubusercontent.com/lixuanye1994/4K-IPTV-M3U/main/txt/%E4%B8%8A%E6%B5%B7%E8%81%94%E9%80%9A1.txt</code></td></tr>
 </tbody>
 </table>
 ---

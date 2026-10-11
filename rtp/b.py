@@ -34,8 +34,35 @@ GITHUB_COMMIT_PREFIX = "Auto update"
 EPG_URL = "http://epg.51zmt.top:8000/e.xml.gz"
 TVG_LOGO_BASE_URL = "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/"
 README_FILE = "README.md"
+# 默认基址（fork 后会被 detect_raw_base_url 按 git 远程自动替换）
 RAW_BASE_URL = "https://raw.githubusercontent.com/jia070310/4K-IPTV-M3U/main"
 PROXY_PREFIX = "https://gh-proxy.org/"
+
+
+def detect_raw_base_url(default: str) -> str:
+    """从 git origin 推断 raw 基址，fork 后无需手动改配置。
+
+    支持 HTTPS 和 SSH 两种远程地址格式。
+    """
+    try:
+        run = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True, text=True, encoding="utf-8", errors="ignore",
+            cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        )
+        if run.returncode != 0:
+            return default
+        url = run.stdout.strip()
+    except Exception:
+        return default
+
+    # https://github.com/<owner>/<repo>(.git)  或  git@github.com:<owner>/<repo>(.git)
+    m = re.search(r"github\.com[:/]([^/]+?)/([^/]+?)(?:\.git)?$", url, flags=re.IGNORECASE)
+    if not m:
+        return default
+    owner, repo = m.group(1), m.group(2)
+    return f"https://raw.githubusercontent.com/{owner}/{repo}/main"
+
 
 # 中国省份全称及简称对照表，用于智能嗅探
 PROVINCES = ["北京", "天津", "河北", "山西", "内蒙古", "辽宁", "吉林", "黑龙江", "上海",
@@ -52,6 +79,18 @@ PROVINCE_CODES = {
     "广西": "gx", "海南": "hi", "重庆": "cq", "四川": "sc", "贵州": "gz",
     "云南": "yn", "陕西": "sn", "甘肃": "gs", "青海": "qh", "宁夏": "nx",
     "新疆": "xj",
+}
+
+# 省份简称对照表，用于 run_single_province 的便捷输入
+PROVINCE_SHORT_NAMES = {
+    "京": "北京", "津": "天津", "冀": "河北", "晋": "山西", "蒙": "内蒙古",
+    "辽": "辽宁", "吉": "吉林", "黑": "黑龙江", "沪": "上海",
+    "苏": "江苏", "浙": "浙江", "皖": "安徽", "闽": "福建", "赣": "江西",
+    "鲁": "山东", "豫": "河南", "鄂": "湖北", "湘": "湖南", "粤": "广东",
+    "桂": "广西", "琼": "海南", "渝": "重庆", "川": "四川", "黔": "贵州",
+    "贵": "贵州", "滇": "云南", "云": "云南", "陕": "陕西", "秦": "陕西",
+    "甘": "甘肃", "陇": "甘肃", "青": "青海", "宁": "宁夏", "新": "新疆",
+    "藏": "西藏",
 }
 
 
@@ -87,6 +126,27 @@ def clear_output_files(txt_output_dir, m3u_output_dir):
                 except OSError:
                     pass
 
+
+def prune_stale_outputs(txt_output_dir, m3u_output_dir, keep: set[str]):
+    """删除本次未重新生成的旧文件，避免旧命名残留。
+
+    与 clear_output_files 不同：先抓取、后清理，抓取失败时不会丢掉已有产物。
+    keep 为本次运行实际生成的文件名集合（相对各目录的 basename）。
+    """
+    for out_dir in (txt_output_dir, m3u_output_dir):
+        if not os.path.exists(out_dir):
+            continue
+        for name in os.listdir(out_dir):
+            if not (name.endswith(".txt") or name.endswith(".m3u")):
+                continue
+            if name in keep:
+                continue
+            try:
+                os.remove(os.path.join(out_dir, name))
+                print(f"[*] 清理旧文件: {out_dir}/{name}")
+            except OSError:
+                pass
+
 def _strip_html(raw):
     no_tags = re.sub(r"<[^>]+>", "", raw)
     return unescape(no_tags).replace("\xa0", " ").strip()
@@ -115,6 +175,24 @@ def generate_paer_token() -> str:
 
 REQUEST_DELAY_SEC = 0.8
 REQUEST_MAX_RETRIES = 5
+RETRY_MAX_WAIT_SEC = 120
+RETRY_JITTER_SEC = 1.5
+
+
+def _compute_backoff(resp: requests.Response | None, attempt: int) -> float:
+    """优先采用服务端 Retry-After，否则指数退避 + 随机抖动。"""
+    # 1. 服务端明确要求了等待时间（秒数或 HTTP 日期），优先遵守
+    if resp is not None:
+        raw = resp.headers.get("Retry-After")
+        if raw:
+            try:
+                return min(RETRY_MAX_WAIT_SEC, float(raw))
+            except ValueError:
+                pass
+    # 2. 兜底：指数退避 + 随机抖动，避免多请求同步重试加剧拥堵
+    base = REQUEST_DELAY_SEC * (2 ** attempt) * 3
+    jitter = random.uniform(0, RETRY_JITTER_SEC)
+    return min(RETRY_MAX_WAIT_SEC, base + jitter)
 
 
 def signed_get(path_query: str, session: requests.Session | None = None) -> dict:
@@ -132,7 +210,7 @@ def signed_get(path_query: str, session: requests.Session | None = None) -> dict
         try:
             resp = sess.get(url, headers=headers, timeout=30)
             if resp.status_code == 429:
-                wait = min(30, REQUEST_DELAY_SEC * (2 ** attempt) * 3)
+                wait = _compute_backoff(resp, attempt)
                 print(f"[!] 请求过于频繁，{wait:.1f}s 后重试 ({attempt + 1}/{REQUEST_MAX_RETRIES})...")
                 time.sleep(wait)
                 continue
@@ -142,7 +220,7 @@ def signed_get(path_query: str, session: requests.Session | None = None) -> dict
         except requests.HTTPError as e:
             last_error = e
             if e.response is not None and e.response.status_code in (429, 503):
-                wait = min(30, REQUEST_DELAY_SEC * (2 ** attempt) * 3)
+                wait = _compute_backoff(e.response, attempt)
                 print(f"[!] HTTP {e.response.status_code}，{wait:.1f}s 后重试 ({attempt + 1}/{REQUEST_MAX_RETRIES})...")
                 time.sleep(wait)
                 continue
@@ -539,11 +617,11 @@ def _build_readme_table_rows(repo_root: str, subdir: str, ext: str, updated_at: 
     if not names:
         return '<tr><td colspan="4">暂无文件</td></tr>'
 
+    base_url = detect_raw_base_url(RAW_BASE_URL)
     rows = []
     for name in names:
-        file_path = os.path.join(target_dir, name)
         encoded_name = quote(name)
-        raw_url = f"{RAW_BASE_URL}/{subdir}/{encoded_name}"
+        raw_url = f"{base_url}/{subdir}/{encoded_name}"
         proxy_url = f"{PROXY_PREFIX}{raw_url}"
         rows.append(
             "<tr>"
@@ -644,14 +722,7 @@ def process_province(
     max_age_hours=72,
 ):
     """单一省份核心流水线"""
-    group_title = province
-    out_txt = os.path.join(txt_output_dir, f"{group_title}.txt")
-    out_m3u = os.path.join(m3u_output_dir, f"{group_title}.m3u")
-
-    # 1. 检测已有文件
-    if check_and_clear_existing(out_txt, out_m3u): return
-
-    # 2. 直接从频道列表提取 频道名+播放地址
+    # 1. 先在内存中抓取，成功后才落盘，避免抓取失败时把已有产物清空
     grouped_sources, status, _ = fetch_channel_lines_by_province(
         province,
         max_pages=max_pages,
@@ -662,10 +733,11 @@ def process_province(
         print(f"[-] [{province}] 频道提取失败: {status}")
         return
 
-    # 3. 按运营商分组、按源序号分别生成 txt/m3u
+    # 2. 抓取成功，落盘覆盖旧文件
     #    例：山东电信.m3u、山东电信1.m3u、山东电信2.m3u ...
     total_channels = 0
     exported_sources = 0
+    written: set[str] = set()
     for group_title, sources in grouped_sources.items():
         for idx, channel_lines in enumerate(sources):
             if not channel_lines:
@@ -679,12 +751,15 @@ def process_province(
                 f_txt.write(txt_content + "\n")
                 f_m3u.write(f'#EXTM3U x-tvg-url="{EPG_URL}"\n')
                 f_m3u.write(txt_to_m3u_format(txt_content, group_title) + "\n")
+            written.add(f"{file_stem}.txt")
+            written.add(f"{file_stem}.m3u")
             exported_sources += 1
             total_channels += len(channel_lines)
     if exported_sources == 0:
         print(f"[-] [{province}] 频道提取失败: channel_lines_empty")
-        return
+        return written
     print(f"[+] 完美！[{province}] 更新完成，导出 {total_channels} 条频道，生成 {exported_sources} 条源文件（每运营商多条）。")
+    return written
 
 def push_to_github(files):
     """
@@ -780,6 +855,86 @@ def parse_args():
     return ap.parse_args()
 
 
+def resolve_province(keyword: str) -> str | None:
+    """把用户输入解析为完整省份名；匹配不到时返回 None。
+
+    支持全称（广东）、简称（粤）、以及唯一子串（"山东" 唯一命中山东省）。
+    """
+    if not keyword:
+        return None
+    keyword = keyword.strip()
+
+    # 1. 全称精确命中
+    if keyword in PROVINCES:
+        return keyword
+
+    # 2. 简称精确命中
+    if keyword in PROVINCE_SHORT_NAMES:
+        return PROVINCE_SHORT_NAMES[keyword]
+
+    # 3. 子串匹配（如 "蒙古" -> "内蒙古"，前提是结果唯一）
+    hits = [p for p in PROVINCES if keyword in p]
+    if len(hits) == 1:
+        return hits[0]
+    return None
+
+
+def run_single_province(
+    keyword: str,
+    repo_root: str | None = None,
+    push: bool = False,
+    max_pages: int = 30,
+    max_per_carrier: int = 5,
+    max_age_hours: int = 72,
+):
+    """单独抓取一个省份并生成 txt/m3u。
+
+    与全量运行不同：不会清空其他省份的历史产物，只覆盖该省份自己的文件。
+    适合自己日常更新所在省份时使用。
+    """
+    province = resolve_province(keyword)
+    if not province:
+        print(f"[-] 无法识别省份: {keyword!r}")
+        print(f"    支持的省份: {'、'.join(PROVINCES)}")
+        print("    也支持简称，例如: 粤、京、沪、鲁")
+        return False
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = repo_root or os.path.dirname(script_dir)
+    txt_output_dir = os.path.join(repo_root, "txt")
+    m3u_output_dir = os.path.join(repo_root, "m3u")
+    os.makedirs(txt_output_dir, exist_ok=True)
+    os.makedirs(m3u_output_dir, exist_ok=True)
+
+    print("\n" + "=" * 50)
+    print(f" 单独更新地区任务: {province}")
+    print("=" * 50)
+    process_province(
+        province,
+        txt_output_dir,
+        m3u_output_dir,
+        max_pages=max_pages,
+        max_per_carrier=max_per_carrier,
+        max_age_hours=max_age_hours,
+    )
+
+    generated_files = [
+        os.path.join("txt", f) for f in os.listdir(txt_output_dir) if f.endswith(".txt")
+    ]
+    generated_files.extend(
+        os.path.join("m3u", f) for f in os.listdir(m3u_output_dir) if f.endswith(".m3u")
+    )
+    update_readme_file_list(repo_root)
+    generated_files.append(README_FILE)
+
+    if push:
+        print("\n[*] 准备执行 GitHub 同步...")
+        push_to_github(generated_files)
+    else:
+        print(f"\n[+] {province} 更新完毕（未启用 --push，跳过 git 推送）。")
+    return True
+
+
 def main():
     args = parse_args()
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -794,39 +949,56 @@ def main():
             max_per_carrier=args.max_per_carrier,
             max_age_hours=args.max_age_hours,
         )
-        total = (
-            sum(len(lines) for sources in grouped_sources.values() for lines in sources)
-            if grouped_sources
-            else 0
-        )
+        if grouped_sources:
+            total = sum(len(lines) for sources in grouped_sources.values() for lines in sources)
+        else:
+            total = 0
         print(f"\n[*] 测试结果: 地区={args.test_region}，分组={group_title}，状态={status}，频道数={total}")
-        for k, sources in grouped_sources.items():
+        for k, sources in (grouped_sources.items() if isinstance(grouped_sources, dict) else []):
             n_sources = len(sources)
             n_lines = sum(len(x) for x in sources)
             print(f"  - {k}: {n_sources} 条源，共 {n_lines} 条")
         return
 
-    os.makedirs(txt_output_dir, exist_ok=True)
-    os.makedirs(m3u_output_dir, exist_ok=True)
-    # Only clear outputs on full runs; avoid wiping other provinces during partial updates.
-    if not args.only_province:
-        clear_output_files(txt_output_dir, m3u_output_dir)
-
-    # 流水线处理各省份
-    for province in PROVINCES:
-        if args.only_province and args.only_province not in province:
-            continue
-        print(f"\n" + "="*50)
-        print(f" 正在处理地区任务: {province}")
-        print("="*50)
-        process_province(
-            province,
-            txt_output_dir,
-            m3u_output_dir,
+    # 单省份模式：只更新这一个省，不动其他省份的历史产物
+    if args.only_province:
+        ok = run_single_province(
+            args.only_province,
+            repo_root=repo_root,
+            push=args.push,
             max_pages=args.max_pages,
             max_per_carrier=args.max_per_carrier,
             max_age_hours=args.max_age_hours,
         )
+        if not ok:
+            return
+        if args.push:
+            print("\n[] 史诗级闭环！全网搜源 -> 深度测流 -> 覆盖生成 -> GitHub 发布，全部完成！")
+        return
+
+    os.makedirs(txt_output_dir, exist_ok=True)
+    os.makedirs(m3u_output_dir, exist_ok=True)
+
+    # 流水线处理各省份（先抓取、后清理，抓取失败不会丢失已有产物）
+    generated: set[str] = set()
+    for province in PROVINCES:
+        print(f"\n" + "="*50)
+        print(f" 正在处理地区任务: {province}")
+        print("="*50)
+        generated.update(
+            process_province(
+                province,
+                txt_output_dir,
+                m3u_output_dir,
+                max_pages=args.max_pages,
+                max_per_carrier=args.max_per_carrier,
+                max_age_hours=args.max_age_hours,
+            ) or set()
+        )
+
+    # 删除本次未重新生成的旧文件（清理旧命名残留）
+    if generated:
+        prune_stale_outputs(txt_output_dir, m3u_output_dir, generated)
 
     generated_files = []
     generated_files.extend(
